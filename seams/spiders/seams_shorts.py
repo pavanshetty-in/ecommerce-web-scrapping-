@@ -7,26 +7,17 @@ class SeamsShortsSpider(scrapy.Spider):
     start_urls = ['http://in.seamsfriendly.com/collections/shorts']
 
     def parse(self, response):
-        # title=response.css('.ProductItem__Title a::text').extract()
-        # image_url=response.css('.ProductItem__Image').xpath('@src').getall()
-        # price=response.css('.ProductItem__Price::text').extract()
-
-        # for item in zip(title,price):
-        #     scraped_info ={
-        #         'title':item[0],
-        #         'price':item[1],
-        #     }
-
-        # yield scraped_info
         products=response.css('.ProductItem')
-        title=response.css('.ProductItem__Title a::text').extract()
-        price=response.css('.ProductItem__Price::text').extract()
-        image_url=response.css('.ProductItem__Image').xpath('@src').getall()
-        
-        for i in range(len(products)):
+       
+        for product in products:
+            title=product.xpath("descendant-or-self::*[@class and contains(concat(' ', normalize-space(@class), ' '), ' ProductItem__Title ')]/descendant-or-self::*/a/text()").get()
+            price=product.xpath("descendant-or-self::*[@class and contains(concat(' ', normalize-space(@class), ' '), ' ProductItem__Price ')]/text()").get()
+            image_urls=product.xpath("descendant-or-self::*[@class and contains(concat(' ', normalize-space(@class), ' '), ' ProductItem__Image ')]/@data-src").getall()
+            # colors=product.xpath("")
             
             yield{
-                'Title':title[i],
-                'Price':price[i][1:],
+                'Title':title,
+                'Price':price[1:],
+                'image_urls':["https:"+img for img in image_urls],
             }
             
